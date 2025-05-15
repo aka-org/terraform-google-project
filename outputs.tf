@@ -33,6 +33,15 @@ output "sa_emails" {
   value       = module.service_accounts.sa_emails
 }
 
+output "identity_provider_github_id" {
+  description = "Workload identity provider for Github Actions"
+  value       = module.gha_wif.identity_provider_github_id
+}
+
+output "identity_provider_github_full_id" {
+  description = "Full path of workload identity provider for Github Actions"
+  value       = module.gha_wif.identity_provider_github_full_id
+}
 output "vpc_name" {
   description = "Name of the project vpc"
   value       = module.vpc.vpc_name

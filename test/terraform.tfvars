@@ -23,12 +23,23 @@ bucket = {
 gcs_backend = true
 service_accounts = [
   {
-    id          = "test-sa"
-    description = "Service account used for testing sa creation"
+    id          = "gha-sa"
+    description = "Service account used by Github Actions"
     roles = [
-      "roles/iam.serviceAccountUser"
+      "roles/compute.admin",
+      "roles/compute.networkAdmin",
+      "roles/storage.admin",
+      "roles/secretmanager.admin",
+      "roles/resourcemanager.projectIamAdmin",
+      "roles/iam.serviceAccountUser",
+      "roles/iam.serviceAccountAdmin",
+      "roles/iam.serviceAccountKeyAdmin"
     ]
   }
 ]
-create_vpc = true
-vpc_name   = "main"
+gha_wif_enabled = true
+gha_wif_sa      = "gha-sa"
+gha_wif_org     = "aka-org"
+gha_wif_repo    = "terraform-google-project"
+create_vpc      = true
+vpc_name        = "main"
