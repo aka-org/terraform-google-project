@@ -1,0 +1,74 @@
+variable "project_name" {
+  description = "A human-readable name for the project"
+  type        = string
+  default     = ""
+}
+
+variable "project_labels" {
+  description = "Labels to add to project"
+  type        = map(string)
+  default     = {}
+}
+
+variable "project_deletion_policy" {
+  description = "Project deletion policy (e.g. PREVENT or DELETE)"
+  type        = string
+  default     = "PREVENT"
+}
+
+variable "billing_account_id" {
+  description = "Billing account ID to associate with the project"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "enable_apis" {
+  description = "Lists of Google APIs to be enabled"
+  type        = list(string)
+  default     = []
+}
+
+variable "gcs_backend" {
+  description = "If true creates bucket named after project id to store tf states and a local backend.tf"
+  type        = bool
+  default     = false
+}
+
+variable "bucket" {
+  description = "Object describing a bucket for project tf states"
+  type = object({
+    location           = string
+    force_destroy      = bool
+    versioning_enabled = bool
+    labels             = map(string)
+  })
+  default = {
+    location           = "us-east1"
+    force_destroy      = false
+    versioning_enabled = true
+    labels             = {}
+  }
+}
+
+variable "service_accounts" {
+  description = "List of service accounts with role bindings"
+  type = list(object({
+    id          = string
+    roles       = list(string)
+    description = string
+  }))
+  default = []
+}
+
+variable "create_vpc" {
+  description = "Set to true to create a default project vpc"
+  type        = bool
+  default     = false
+}
+
+variable "vpc_name" {
+  description = "Name of the project vpc"
+  type        = string
+  default     = ""
+}
