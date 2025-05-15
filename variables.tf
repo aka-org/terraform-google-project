@@ -1,7 +1,6 @@
 variable "project_name" {
   description = "A human-readable name for the project"
   type        = string
-  default     = ""
 }
 
 variable "project_labels" {
@@ -20,7 +19,6 @@ variable "billing_account_id" {
   description = "Billing account ID to associate with the project"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
 variable "enable_apis" {
@@ -59,6 +57,30 @@ variable "service_accounts" {
     description = string
   }))
   default = []
+}
+
+variable "gha_wif_enabled" {
+  description = "Set to true to setup Workload Identity Federation for Github Actions"
+  type        = bool
+  default     = false
+}
+
+variable "gha_wif_sa" {
+  description = "Service account to be associated with Github identity pool, must be defined in service accounts"
+  type        = string
+  default     = ""
+}
+
+variable "gha_wif_org" {
+  description = "Github org or user from which actions are allowed to authenticate via WIF"
+  type        = string
+  default     = ""
+}
+
+variable "gha_wif_repo" {
+  description = "Github repo from which actions are allowed to authenticate via WIF"
+  type        = string
+  default     = ""
 }
 
 variable "create_vpc" {

@@ -25,9 +25,24 @@ module "service_accounts" {
   source           = "./modules/service_accounts"
   project_id       = module.project.project_id
   service_accounts = var.service_accounts
-  depends_on       = [
+  depends_on = [
     module.apis,
     module.bucket
+  ]
+}
+
+module "gha_wif" {
+  source          = "./modules/gha_wif"
+  project_id      = module.project.project_id
+  sa_ids          = module.service_accounts.sa_ids
+  gha_wif_enabled = var.gha_wif_enabled
+  gha_wif_sa      = var.gha_wif_sa
+  gha_wif_org     = var.gha_wif_org
+  gha_wif_repo    = var.gha_wif_repo
+  depends_on = [
+    module.apis,
+    module.bucket,
+    module.service_accounts
   ]
 }
 
