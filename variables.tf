@@ -41,12 +41,8 @@ variable "bucket" {
     versioning_enabled = bool
     labels             = map(string)
   })
-  default = {
-    location           = "us-east1"
-    force_destroy      = false
-    versioning_enabled = true
-    labels             = {}
-  }
+  default  = null
+  nullable = true
 }
 
 variable "service_accounts" {
@@ -75,12 +71,14 @@ variable "gha_wif_org" {
   description = "Github org or user from which actions are allowed to authenticate via WIF"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "gha_wif_repo" {
   description = "Github repo from which actions are allowed to authenticate via WIF"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "create_vpc" {

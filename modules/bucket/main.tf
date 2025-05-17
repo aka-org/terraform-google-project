@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "this" {
-  count = var.gcs_backend ? 1 : 0
+  count = var.bucket != null ? 1 : 0
 
   name          = "${var.project_id}-tf-states"
   location      = var.bucket.location
@@ -12,7 +12,7 @@ resource "google_storage_bucket" "this" {
 }
 
 resource "local_file" "gcs_backend" {
-  count = var.gcs_backend ? 1 : 0
+  count = var.gcs_backend && var.bucket != null ? 1 : 0
 
   file_permission = "0644"
   filename        = "${path.cwd}/backend.tf"

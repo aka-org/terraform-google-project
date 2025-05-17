@@ -18,10 +18,6 @@ variable "bucket" {
     versioning_enabled = bool
     labels             = map(string)
   })
-  default = {
-    location           = "us-east1"
-    force_destroy      = false
-    versioning_enabled = true
-    labels             = {}
-  }
+  default  = null
+  nullable = true
 }

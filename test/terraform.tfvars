@@ -20,7 +20,7 @@ bucket = {
     env = "testing"
   }
 }
-gcs_backend = true
+gcs_backend = false
 service_accounts = [
   {
     id          = "gha-sa"
@@ -40,6 +40,6 @@ service_accounts = [
 gha_wif_enabled = true
 gha_wif_sa      = "gha-sa"
 gha_wif_org     = "aka-org"
-gha_wif_repo    = "terraform-google-project"
+gha_wif_repo    = ""
 create_vpc      = true
 vpc_name        = "main"
