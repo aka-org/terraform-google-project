@@ -26,10 +26,12 @@ variable "gha_wif_org" {
   description = "Github org or user from which actions are allowed to authenticate via WIF"
   type        = string
   default     = ""
+  nullable    = false
 }
 
 variable "gha_wif_repo" {
   description = "Github repo from which actions are allowed to authenticate via WIF"
   type        = string
   default     = ""
+  nullable    = false
 }
