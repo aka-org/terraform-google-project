@@ -1,5 +1,6 @@
 locals {
-  gha_wif_enabled = var.gha_wif_enabled && contains(var.sa_ids, var.gha_wif_sa)
+  gha_wif_enabled = var.gha_wif_enabled && contains(var.sa_ids, var.gha_wif_sa) && var.gha_wif_org != ""
+  gha_repo        = var.gha_wif_repo == "" ? "${var.gha_wif_org}" : "${var.gha_wif_org}/${var.gha_wif_repo}"
 }
 
 data "google_service_account" "gha_wif_sa" {
@@ -40,7 +41,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.repository" = "assertion.repository"
   }
 
-  attribute_condition = "attribute.repository == '${var.gha_wif_org}/${var.gha_wif_repo}'"
+  attribute_condition = "string(attribute.repository).startsWith(string('${local.gha_repo}'))"
 }
 
 resource "google_service_account_iam_member" "gha_wif_binding" {
@@ -50,5 +51,5 @@ resource "google_service_account_iam_member" "gha_wif_binding" {
   service_account_id = data.google_service_account.gha_wif_sa[0].id
 
   role   = "roles/iam.workloadIdentityUser"
-  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github[0].name}/attribute.repository/${var.gha_wif_org}/${var.gha_wif_repo}"
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github[0].name}/attribute.repository/${local.gha_repo}"
 }
