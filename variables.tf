@@ -19,11 +19,10 @@ variable "billing_account_id" {
   description = "Billing account ID to associate with the project"
   type        = string
   sensitive   = true
-  default     = ""
 }
 
 variable "enable_apis" {
-  description = "Lists of Google APIs to be enabled"
+  description = "Lists of additional Google APIs to be enabled"
   type        = list(string)
   default     = []
 }
@@ -31,7 +30,7 @@ variable "enable_apis" {
 variable "bucket_name_prefix" {
   description = "The prefix of the name of the bucket that will store the tf states"
   type        = string
-  default     = "tf-states"
+  default     = ""
   nullable    = false
 }
 
