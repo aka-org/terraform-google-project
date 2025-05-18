@@ -4,34 +4,25 @@ variable "project_id" {
   default     = ""
 }
 
+variable "sa_id" {
+  description = "ID of the default service account"
+  type        = string
+}
+
 variable "gha_wif_enabled" {
   description = "Set to true to setup Workload Identity Federation for Github Actions"
   type        = bool
   default     = false
 }
 
-variable "sa_ids" {
-  description = "A list of ids corresponding to all available service accounts"
+variable "gha_owner_id" {
+  description = "ID of the owner of the github repos allowed to authenticate via identity provider"
+  type        = string
+  default     = ""
+}
+
+variable "gha_allowed_repos" {
+  description = "List of repos allowed to authenticate via identity provider"
   type        = list(string)
   default     = []
-}
-
-variable "gha_wif_sa" {
-  description = "Service account to be associated with Github identity pool, must be defined in service accounts"
-  type        = string
-  default     = ""
-}
-
-variable "gha_wif_org" {
-  description = "Github org or user from which actions are allowed to authenticate via WIF"
-  type        = string
-  default     = ""
-  nullable    = false
-}
-
-variable "gha_wif_repo" {
-  description = "Github repo from which actions are allowed to authenticate via WIF"
-  type        = string
-  default     = ""
-  nullable    = false
 }

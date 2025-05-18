@@ -13,46 +13,52 @@ module "apis" {
   depends_on  = [module.project]
 }
 
-module "bucket" {
-  source      = "./modules/bucket"
-  project_id  = module.project.project_id
-  bucket      = var.bucket
-  gcs_backend = var.gcs_backend
-  depends_on  = [module.apis]
+module "service_account" {
+  source         = "./modules/service_account"
+  project_id     = module.project.project_id
+  sa_id          = var.sa_id
+  sa_description = var.sa_description
+  sa_roles       = var.sa_roles
+  depends_on     = [module.project]
 }
 
-module "service_accounts" {
-  source           = "./modules/service_accounts"
-  project_id       = module.project.project_id
-  service_accounts = var.service_accounts
+module "bucket" {
+  source               = "./modules/bucket"
+  project_id           = module.project.project_id
+  sa_id                = module.service_account.sa_id
+  bucket_name_prefix   = var.bucket_name_prefix
+  bucket_location      = var.bucket_location
+  bucket_force_destroy = var.bucket_force_destroy
+  bucket_versioning    = var.bucket_versioning
+  bucket_labels        = var.bucket_labels
+  gcs_backend          = var.gcs_backend
   depends_on = [
-    module.apis,
-    module.bucket
+    module.project,
+    module.service_account
   ]
 }
 
 module "gha_wif" {
-  source          = "./modules/gha_wif"
-  project_id      = module.project.project_id
-  sa_ids          = module.service_accounts.sa_ids
-  gha_wif_enabled = var.gha_wif_enabled
-  gha_wif_sa      = var.gha_wif_sa
-  gha_wif_org     = var.gha_wif_org
-  gha_wif_repo    = var.gha_wif_repo
+  source            = "./modules/gha_wif"
+  project_id        = module.project.project_id
+  sa_id             = module.service_account.sa_id
+  gha_wif_enabled   = var.gha_wif_enabled
+  gha_owner_id      = var.gha_owner_id
+  gha_allowed_repos = var.gha_allowed_repos
   depends_on = [
-    module.apis,
-    module.bucket,
-    module.service_accounts
+    module.project,
+    module.service_account
   ]
 }
 
 module "vpc" {
   source     = "./modules/vpc"
   project_id = module.project.project_id
-  create_vpc = var.create_vpc
+  sa_id      = module.service_account.sa_id
+  vpc_create = var.vpc_create
   vpc_name   = var.vpc_name
   depends_on = [
-    module.apis,
-    module.bucket
+    module.project,
+    module.service_account
   ]
 }
