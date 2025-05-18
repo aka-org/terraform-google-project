@@ -4,7 +4,12 @@ variable "project_id" {
   default     = ""
 }
 
-variable "create_vpc" {
+variable "sa_id" {
+  description = "The email of the default service account"
+  type        = string
+}
+
+variable "vpc_create" {
   description = "Set to true to create a default project vpc"
   type        = bool
   default     = false

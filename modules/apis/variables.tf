@@ -5,7 +5,7 @@ variable "project_id" {
 }
 
 variable "enable_apis" {
-  description = "Lists of Google APIs to be enabled"
+  description = "Lists of additional Google APIs to be enabled"
   type        = list(string)
   default     = []
 }

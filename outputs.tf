@@ -23,25 +23,26 @@ output "bucket_labels" {
   value       = module.bucket.bucket_labels
 }
 
-output "sa_ids" {
-  description = "List of service accounts ids"
-  value       = module.service_accounts.sa_ids
+output "sa_email" {
+  description = "Default service account email"
+  value       = module.service_account.sa_email
 }
 
-output "sa_emails" {
-  description = "List of service accounts emails"
-  value       = module.service_accounts.sa_emails
+output "sa_id" {
+  description = "Default service account id"
+  value       = module.service_account.sa_id
 }
 
-output "identity_provider_github_id" {
+output "identity_provider_github_ids" {
   description = "Workload identity provider for Github Actions"
-  value       = module.gha_wif.identity_provider_github_id
+  value       = module.gha_wif.identity_provider_github_ids
 }
 
-output "identity_provider_github_full_id" {
+output "identity_provider_github_full_ids" {
   description = "Full path of workload identity provider for Github Actions"
-  value       = module.gha_wif.identity_provider_github_full_id
+  value       = module.gha_wif.identity_provider_github_full_ids
 }
+
 output "vpc_name" {
   description = "Name of the project vpc"
   value       = module.vpc.vpc_name

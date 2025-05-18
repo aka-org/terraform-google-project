@@ -22,9 +22,40 @@ variable "billing_account_id" {
 }
 
 variable "enable_apis" {
-  description = "Lists of Google APIs to be enabled"
+  description = "Lists of additional Google APIs to be enabled"
   type        = list(string)
   default     = []
+}
+
+variable "bucket_name_prefix" {
+  description = "The prefix of the name of the bucket that will store the tf states"
+  type        = string
+  default     = ""
+  nullable    = false
+}
+
+variable "bucket_location" {
+  description = "Location of the bucket corresponding to google regions"
+  type        = string
+  default     = "us-east1"
+}
+
+variable "bucket_force_destroy" {
+  description = "Set to true to allow the bucket to be destroyed even if it is storing content"
+  type        = bool
+  default     = false
+}
+
+variable "bucket_versioning" {
+  description = "Set to true to enable versioning of bucket contents"
+  type        = bool
+  default     = true
+}
+
+variable "bucket_labels" {
+  description = "Labels to add to the created bucket"
+  type        = map(string)
+  default     = {}
 }
 
 variable "gcs_backend" {
@@ -33,26 +64,26 @@ variable "gcs_backend" {
   default     = false
 }
 
-variable "bucket" {
-  description = "Object describing a bucket for project tf states"
-  type = object({
-    location           = string
-    force_destroy      = bool
-    versioning_enabled = bool
-    labels             = map(string)
-  })
-  default  = null
-  nullable = true
+variable "sa_id" {
+  description = "The id of the default service account"
+  type        = string
+  default     = "terraform-sa"
 }
 
-variable "service_accounts" {
-  description = "List of service accounts with role bindings"
-  type = list(object({
-    id          = string
-    roles       = list(string)
-    description = string
-  }))
-  default = []
+variable "sa_description" {
+  description = "Description of the default service account"
+  type        = string
+  default     = "Default service account used by Terraform"
+}
+
+variable "sa_roles" {
+  description = "List of roles to be assigned to the default service account"
+  type        = list(string)
+  default = [
+    "roles/resourcemanager.projectIamAdmin",
+    "roles/iam.serviceAccountUser",
+    "roles/iam.serviceAccountAdmin"
+  ]
 }
 
 variable "gha_wif_enabled" {
@@ -61,27 +92,19 @@ variable "gha_wif_enabled" {
   default     = false
 }
 
-variable "gha_wif_sa" {
-  description = "Service account to be associated with Github identity pool, must be defined in service accounts"
+variable "gha_owner_id" {
+  description = "ID of the owner of the github repos allowed to authenticate via identity provider"
   type        = string
   default     = ""
 }
 
-variable "gha_wif_org" {
-  description = "Github org or user from which actions are allowed to authenticate via WIF"
-  type        = string
-  default     = ""
-  nullable    = false
+variable "gha_allowed_repos" {
+  description = "List of repos allowed to authenticate via identity provider"
+  type        = list(string)
+  default     = []
 }
 
-variable "gha_wif_repo" {
-  description = "Github repo from which actions are allowed to authenticate via WIF"
-  type        = string
-  default     = ""
-  nullable    = false
-}
-
-variable "create_vpc" {
+variable "vpc_create" {
   description = "Set to true to create a default project vpc"
   type        = bool
   default     = false
