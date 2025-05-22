@@ -2,7 +2,8 @@ locals {
   default_sa_roles = [
     "roles/resourcemanager.projectIamAdmin",
     "roles/iam.serviceAccountUser",
-    "roles/iam.serviceAccountAdmin"
+    "roles/iam.serviceAccountAdmin",
+    "roles/serviceusage.serviceUsageAdmin"
   ]
   sa_roles = concat(local.default_sa_roles, var.sa_roles)
 }

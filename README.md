@@ -84,6 +84,7 @@ module "project" {
 - `roles/resourcemanager.projectIamAdmin`
 - `roles/iam.serviceAccountUser`
 - `roles/iam.serviceAccountAdmin`
+- `roles/serviceusage.serviceUsageAdmin`
 
 ---
 
@@ -127,6 +128,7 @@ module "project" {
   - `roles/resourcemanager.projectIamAdmin`
   - `roles/iam.serviceAccountUser`
   - `roles/iam.serviceAccountAdmin`
+  - `roles/serviceusage.serviceUsageAdmin`
 - **VPC** (if enabled):
   - `roles/compute.networkAdmin`
 - **State Bucket** (if enabled):
