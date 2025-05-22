@@ -25,7 +25,7 @@ resource "google_project_service" "enabled_apis" {
 resource "google_billing_project_info" "this" {
   project         = google_project.this.project_id
   billing_account = var.billing_account_id
-  depends_on      = [
+  depends_on = [
     google_project_service.enabled_apis["cloudbilling.googleapis.com"]
   ]
 }

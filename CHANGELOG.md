@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.2.0
+### ADDED
+- Add `roles/serviceusage.serviceUsageAdmin` to default SA.
+
 ## 1.1.0
 ### CHANGED
 - Google API enabling now happen directly after project creation even for togglable features.
