@@ -4,8 +4,13 @@ variable "project_id" {
   default     = ""
 }
 
-variable "sa_id" {
-  description = "ID of the default service account"
+variable "sa_name" {
+  description = "Fully-qualified name of the default service account"
+  type        = string
+}
+
+variable "sa_email" {
+  description = "Email of the default service account"
   type        = string
 }
 

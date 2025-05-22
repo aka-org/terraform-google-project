@@ -2,26 +2,12 @@ resource "random_id" "bucket_name_suffix" {
   byte_length = 4
 }
 
-data "google_service_account" "default_sa" {
-  for_each = var.bucket_name_prefix != "" ? toset([var.sa_id]) : toset([])
-
-  account_id = each.value
-  project    = var.project_id
-}
-
-resource "google_project_service" "enabled_apis" {
-  for_each = var.bucket_name_prefix != "" ? toset(["storage.googleapis.com"]) : toset([])
-
-  project = var.project_id
-  service = each.value
-}
-
 resource "google_project_iam_member" "default_sa_roles" {
   for_each = var.bucket_name_prefix != "" ? toset(["roles/storage.admin"]) : toset([])
 
   project = var.project_id
   role    = each.value
-  member  = "serviceAccount:${data.google_service_account.default_sa[var.sa_id].email}"
+  member  = "serviceAccount:${var.sa_email}"
 }
 
 resource "google_storage_bucket" "tf_states" {
@@ -36,7 +22,6 @@ resource "google_storage_bucket" "tf_states" {
   }
   labels = var.bucket_labels
   depends_on = [
-    google_project_service.enabled_apis["storage.googleapis.com"],
     google_project_iam_member.default_sa_roles["roles/storage.admin"]
   ]
 }

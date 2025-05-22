@@ -1,16 +1,30 @@
+
+locals {
+  default_apis = [
+    "serviceusage.googleapis.com",
+    "cloudresourcemanager.googleapis.com",
+    "cloudbilling.googleapis.com",
+    "iam.googleapis.com"
+  ]
+  enable_apis = concat(
+    local.default_apis,
+    var.enable_apis,
+    var.vpc_create ? [
+      "compute.googleapis.com"
+    ] : [],
+    var.bucket_name_prefix != "" ? [
+      "storage.googleapis.com"
+    ] : []
+  )
+}
+
 module "project" {
   source                  = "./modules/project"
   project_name            = var.project_name
   project_labels          = var.project_labels
   project_deletion_policy = var.project_deletion_policy
+  enable_apis             = local.enable_apis
   billing_account_id      = var.billing_account_id
-}
-
-module "apis" {
-  source      = "./modules/apis"
-  project_id  = module.project.project_id
-  enable_apis = var.enable_apis
-  depends_on  = [module.project]
 }
 
 module "service_account" {
@@ -25,7 +39,7 @@ module "service_account" {
 module "bucket" {
   source               = "./modules/bucket"
   project_id           = module.project.project_id
-  sa_id                = module.service_account.sa_id
+  sa_email             = module.service_account.sa_email
   bucket_name_prefix   = var.bucket_name_prefix
   bucket_location      = var.bucket_location
   bucket_force_destroy = var.bucket_force_destroy
@@ -41,7 +55,8 @@ module "bucket" {
 module "gha_wif" {
   source            = "./modules/gha_wif"
   project_id        = module.project.project_id
-  sa_id             = module.service_account.sa_id
+  sa_name           = module.service_account.sa_name
+  sa_email          = module.service_account.sa_email
   gha_wif_enabled   = var.gha_wif_enabled
   gha_owner_id      = var.gha_owner_id
   gha_allowed_repos = var.gha_allowed_repos
@@ -54,7 +69,7 @@ module "gha_wif" {
 module "vpc" {
   source     = "./modules/vpc"
   project_id = module.project.project_id
-  sa_id      = module.service_account.sa_id
+  sa_email   = module.service_account.sa_email
   vpc_create = var.vpc_create
   vpc_name   = var.vpc_name
   depends_on = [

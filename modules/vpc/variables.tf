@@ -4,7 +4,7 @@ variable "project_id" {
   default     = ""
 }
 
-variable "sa_id" {
+variable "sa_email" {
   description = "The email of the default service account"
   type        = string
 }
