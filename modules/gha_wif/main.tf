@@ -3,19 +3,12 @@ resource "random_id" "pool_suffix" {
   byte_length = 4
 }
 
-data "google_service_account" "default_sa" {
-  for_each = var.gha_wif_enabled ? toset([var.sa_id]) : toset([])
-
-  account_id = each.value
-  project    = var.project_id
-}
-
 resource "google_project_iam_member" "default_sa_roles" {
   for_each = var.gha_wif_enabled ? toset(["roles/iam.workloadIdentityPoolAdmin"]) : []
 
   project = var.project_id
   role    = each.value
-  member  = "serviceAccount:${data.google_service_account.default_sa[var.sa_id].email}"
+  member  = "serviceAccount:${var.sa_email}"
 }
 
 resource "google_iam_workload_identity_pool" "github" {
@@ -61,7 +54,7 @@ EOT
 resource "google_service_account_iam_member" "default_sa_repo_bindings" {
   for_each = var.gha_wif_enabled ? toset(var.gha_allowed_repos) : toset([])
 
-  service_account_id = data.google_service_account.default_sa[var.sa_id].id
+  service_account_id = var.sa_name
 
   role   = "roles/iam.workloadIdentityUser"
   member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github[0].name}/attribute.repository/${each.value}"

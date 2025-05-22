@@ -94,6 +94,7 @@ module "project" {
 - `project_labels`: The labels of the project
 - `bucket_name`: The name of the bucket (if created)
 - `bucket_labels`: The labels of the bucket
+- `sa_name`: Default service fully-qualified name
 - `sa_email`: Default service account email
 - `sa_id`: Default service account id
 - `identity_provider_github_ids`: Workload identity provider for Github Actions (if enabled)
@@ -128,12 +129,10 @@ module "project" {
   - `roles/iam.serviceAccountAdmin`
 - **VPC** (if enabled):
   - `roles/compute.networkAdmin`
-  - `roles/compute.admin`
 - **State Bucket** (if enabled):
   - `roles/storage.admin`
 - **GitHub Actions WIF** (if enabled):
   - `roles/iam.workloadIdentityPoolAdmin` (on project)
-  - `roles/iam.workloadIdentityUser` (on service account, per allowed repo)
 
 ---
 

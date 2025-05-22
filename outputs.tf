@@ -33,6 +33,11 @@ output "sa_id" {
   value       = module.service_account.sa_id
 }
 
+output "sa_name" {
+  description = "Default service account fully-qualified name"
+  value       = module.service_account.sa_name
+}
+
 output "identity_provider_github_ids" {
   description = "Workload identity provider for Github Actions"
   value       = module.gha_wif.identity_provider_github_ids

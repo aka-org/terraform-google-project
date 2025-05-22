@@ -16,6 +16,12 @@ variable "project_deletion_policy" {
   default     = "PREVENT"
 }
 
+variable "enable_apis" {
+  description = "Lists of Google APIs to be enabled"
+  type        = list(string)
+  default     = []
+}
+
 variable "billing_account_id" {
   description = "Billing account ID to associate with the project"
   type        = string

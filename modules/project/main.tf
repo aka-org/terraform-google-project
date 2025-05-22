@@ -4,11 +4,6 @@ resource "random_id" "project_suffix" {
 
 locals {
   project_id = "${var.project_name}-${random_id.project_suffix.hex}"
-  project_services = [
-    "serviceusage.googleapis.com",
-    "cloudresourcemanager.googleapis.com",
-    "cloudbilling.googleapis.com"
-  ]
 }
 
 resource "google_project" "this" {
@@ -21,7 +16,7 @@ resource "google_project" "this" {
 }
 
 resource "google_project_service" "enabled_apis" {
-  for_each = toset(local.project_services)
+  for_each = toset(var.enable_apis)
 
   project = google_project.this.project_id
   service = each.value
@@ -30,5 +25,7 @@ resource "google_project_service" "enabled_apis" {
 resource "google_billing_project_info" "this" {
   project         = google_project.this.project_id
   billing_account = var.billing_account_id
-  depends_on      = [google_project_service.enabled_apis["cloudbilling.googleapis.com"]]
+  depends_on      = [
+    google_project_service.enabled_apis["cloudbilling.googleapis.com"]
+  ]
 }
