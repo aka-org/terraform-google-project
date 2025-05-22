@@ -47,7 +47,7 @@ A Terraform module to automate the creation and configuration of a Google Cloud 
 ```hcl
 module "project" {
   source  = "aka-org/project/google"
-  version = "1.0.0"
+  version = "1.2.0"
 
   project_name            = var.project_name
   billing_account_id      = var.billing_account_id
