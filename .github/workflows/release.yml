@@ -1,0 +1,32 @@
+name: Release
+
+# On every push to main: run the checks, then release the version named
+# by the first "## X.Y.Z" heading of CHANGELOG.md if it isn't out yet --
+# an annotated tag vX.Y.Z on this commit (the Terraform Registry
+# publishes from the tag) and a GitHub release whose notes are that
+# changelog section. A push that adds no new version releases nothing;
+# changes not yet released go under a "## Unreleased" heading.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency: release
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag and release the changelog's newest version
+        run: .github/release.sh

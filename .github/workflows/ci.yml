@@ -1,9 +1,14 @@
 name: CI
 
+# The module's checks. Runs on every pull request, once a week (a new
+# Google provider release can break the module with no change here), by
+# hand, and from release.yml before a release.
 on:
   pull_request:
-  push:
-    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * 1"
 
 permissions:
   contents: read
@@ -18,37 +23,47 @@ jobs:
           terraform_version: 1.11.4
       - run: terraform fmt -check -recursive -diff
 
-  validate:
+  validate-and-test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # lowest: the oldest Google provider the constraint allows, pinned
-        # for this job only; newest: whatever the constraint resolves to.
+        # lowest: the oldest Google provider the constraint in versions.tf
+        # allows, pinned for this job only; newest: whatever the
+        # constraint resolves to.
         google: [lowest, newest]
-    env:
-      LOWEST: "6.8.0"
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.11.4
+          terraform_wrapper: false
       - name: Pin the lowest supported Google provider
         if: matrix.google == 'lowest'
         run: |
+          lowest=$(grep -A1 'hashicorp/google"' versions.tf | sed -nE 's/.*version *= *">= *([0-9.]+).*/\1/p')
+          test -n "$lowest"
           find . -name versions.tf -print0 |
-            xargs -0 sed -i -E '/hashicorp\/google"/{n;s/version = ".*"/version = "'"$LOWEST"'"/}'
+            xargs -0 sed -i -E '/hashicorp\/google"/{n;s/version = ".*"/version = "'"$lowest"'"/}'
           grep -rn -A1 'hashicorp/google"' --include=versions.tf .
       - run: terraform init -backend=false -input=false
       - run: terraform providers
       - run: terraform validate
+      # Plans and applies the module against mocked providers (tests/):
+      # no credentials, nothing created.
+      - run: terraform test
 
   tflint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.66.0
       - run: tflint --init
+        env:
+          # Plugin downloads come from GitHub's API, rate-limited without a token.
+          GITHUB_TOKEN: ${{ github.token }}
       - run: tflint --recursive -f compact
 
   docs:
