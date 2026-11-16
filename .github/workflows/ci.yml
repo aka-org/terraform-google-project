@@ -1,11 +1,10 @@
 name: CI
 
-# The module's checks. Runs on every pull request, once a week (a new
-# Google provider release can break the module with no change here), by
-# hand, and from release.yml before a release.
+# The module's checks (aka-org/gcp-infra's shared workflow): on every pull
+# request, once a week (a new Google provider release can break the module
+# with no change here) and by hand.
 on:
   pull_request:
-  workflow_call:
   workflow_dispatch:
   schedule:
     - cron: "17 5 * * 1"
@@ -14,68 +13,5 @@ permissions:
   contents: read
 
 jobs:
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.11.4
-      - run: terraform fmt -check -recursive -diff
-
-  validate-and-test:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # lowest: the oldest Google provider the constraint in versions.tf
-        # allows, pinned for this job only; newest: whatever the
-        # constraint resolves to.
-        google: [lowest, newest]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.11.4
-          terraform_wrapper: false
-      - name: Pin the lowest supported Google provider
-        if: matrix.google == 'lowest'
-        run: |
-          lowest=$(grep -A1 'hashicorp/google"' versions.tf | sed -nE 's/.*version *= *">= *([0-9.]+).*/\1/p')
-          test -n "$lowest"
-          find . -name versions.tf -print0 |
-            xargs -0 sed -i -E '/hashicorp\/google"/{n;s/version = ".*"/version = "'"$lowest"'"/}'
-          grep -rn -A1 'hashicorp/google"' --include=versions.tf .
-      - run: terraform init -backend=false -input=false
-      - run: terraform providers
-      - run: terraform validate
-      # Plans and applies the module against mocked providers (tests/):
-      # no credentials, nothing created.
-      - run: terraform test
-
-  tflint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: v0.66.0
-      - run: tflint --init
-        env:
-          # Plugin downloads come from GitHub's API, rate-limited without a token.
-          GITHUB_TOKEN: ${{ github.token }}
-      - run: tflint --recursive -f compact
-
-  docs:
-    runs-on: ubuntu-latest
-    env:
-      TERRAFORM_DOCS: "v0.25.1"
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install terraform-docs
-        run: |
-          curl -sSfL -o /tmp/terraform-docs.tar.gz "https://terraform-docs.io/dl/${TERRAFORM_DOCS}/terraform-docs-${TERRAFORM_DOCS}-linux-amd64.tar.gz"
-          tar -xzf /tmp/terraform-docs.tar.gz -C /tmp terraform-docs
-          sudo mv /tmp/terraform-docs /usr/local/bin/
-      # Fails when the README's Inputs and Outputs tables differ from the code.
-      - run: terraform-docs --output-check .
+  checks:
+    uses: aka-org/gcp-infra/.github/workflows/terraform-module-ci.yml@main
