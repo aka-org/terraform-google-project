@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.3.0
+### CHANGED
+- The Google provider constraint is a range, `>= 6.8, < 8` (was exactly `6.8.0`); validated on 6.8.0 and 7.46.2.
+- `google_project_service` sets `disable_on_destroy = false`, so provider 6.x and 7.x behave the same: an API removed from the list stays enabled. Existing callers see an in-place change on each API (`true -> false`), with no API call.
+- The state bucket has uniform bucket-level access and enforced public access prevention by default. Existing callers see an in-place update of the bucket; set `bucket_uniform_access = false` / `bucket_public_access_prevention = "inherited"` to keep it as it was.
+### ADDED
+- The `random` and `local` providers are declared in `required_providers`; every submodule declares the providers it uses.
+- `remove_editor_members` (default `true`, the behaviour so far) makes the `roles/editor` binding optional. The resource's address gains `[0]`; a `moved` block carries existing state over, so no caller sees a change.
+- `bucket_uniform_access`, `bucket_public_access_prevention`.
+- Output `project_number`.
+- The GitHub Actions identity providers map the token's `ref` (`attribute.ref`). Existing callers see an in-place update of each provider; no existing binding changes meaning.
+- CI: `terraform fmt`, `validate` on the lowest and newest supported provider, TFLint.
+- README: "Behaviour worth knowing" and "Development".
+### FIXED
+- README: `bucket_name_prefix`'s default (`""`) and the provider requirement.
+
 ## 1.2.0
 ### ADDED
 - Add `roles/serviceusage.serviceUsageAdmin` to default SA.

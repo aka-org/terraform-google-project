@@ -17,6 +17,9 @@ resource "google_storage_bucket" "tf_states" {
   location      = var.bucket_location
   project       = var.project_id
   force_destroy = var.bucket_force_destroy
+
+  uniform_bucket_level_access = var.bucket_uniform_access
+  public_access_prevention    = var.bucket_public_access_prevention
   versioning {
     enabled = var.bucket_versioning
   }

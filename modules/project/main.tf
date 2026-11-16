@@ -20,6 +20,12 @@ resource "google_project_service" "enabled_apis" {
 
   project = google_project.this.project_id
   service = each.value
+
+  # Provider 6.x disables the API when this resource is destroyed unless
+  # told otherwise; 7.x leaves it enabled. Set here so both behave the
+  # same: removing an API from the list never switches it off under
+  # whatever else in the project uses it.
+  disable_on_destroy = false
 }
 
 resource "google_billing_project_info" "this" {

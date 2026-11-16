@@ -8,6 +8,11 @@ output "project_id" {
   value       = module.project.project_id
 }
 
+output "project_number" {
+  description = "The numeric identifier of the project (used in Workload Identity principals and Google-managed service agent emails)"
+  value       = module.project.project_number
+}
+
 output "project_labels" {
   description = "The labels of the project"
   value       = module.project.project_labels

@@ -12,3 +12,8 @@ output "project_labels" {
   description = "The labels of the project"
   value       = google_project.this.labels
 }
+
+output "project_number" {
+  description = "The numeric identifier of the project"
+  value       = google_project.this.number
+}
