@@ -66,6 +66,19 @@ run "one_identity_provider_per_repository" {
   }
 }
 
+run "identity_provider_ids_fit_what_google_accepts" {
+  variables {
+    gha_wif_enabled   = true
+    gha_owner_id      = "1234"
+    gha_allowed_repos = ["acme/gcp-infra", "acme/app", "acme/My_Repo.js"]
+  }
+
+  assert {
+    condition     = output.identity_provider_github_ids == ["gh-gcp-infra", "gh-app", "my-repo-js"]
+    error_message = "A repository name Google would refuse as a provider id (reserved gcp- prefix, under 4 characters, other characters) is adjusted; the provider itself checks the result."
+  }
+}
+
 run "network_on_request" {
   variables {
     vpc_create = true
