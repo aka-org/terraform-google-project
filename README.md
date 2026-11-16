@@ -166,25 +166,25 @@ What a machine needs to work on this module:
 
 | Tool | Version | Used for |
 |---|---|---|
-| [Terraform](https://developer.hashicorp.com/terraform/install) | >= 1.11.4 | `fmt`, `validate` |
+| [Terraform](https://developer.hashicorp.com/terraform/install) | >= 1.11.4 | `fmt`, `validate`, `test` |
 | [TFLint](https://github.com/terraform-linters/tflint) | >= 0.50 | lint (`.tflint.hcl`) |
 | [terraform-docs](https://terraform-docs.io/user-guide/installation/) | >= 0.25 | the README's Inputs and Outputs tables (`.terraform-docs.yml`) |
 | git | any | |
 
-Nothing here needs Google Cloud credentials: `validate` and `tflint` read only the configuration.
+Nothing here needs Google Cloud credentials: `validate` and `tflint` read only the configuration, and the tests (`tests/`) run the module against mocked providers, creating nothing.
 
 The checks CI runs (`.github/workflows/ci.yml`), from the repository root:
 
 ```sh
 terraform fmt -check -recursive -diff
-terraform init -backend=false && terraform validate
+terraform init -backend=false && terraform validate && terraform test
 tflint --init && tflint --recursive
 terraform-docs --output-check .
 ```
 
 After changing a variable or an output, run `terraform-docs .` to rewrite the README's tables.
 
-CI validates twice: on the lowest supported Google provider (6.8.0) and on the newest release the constraint allows. To validate on the lowest locally, change the `google` constraint in every `versions.tf` to `6.8.0`, run `terraform init -backend=false -upgrade && terraform validate`, and revert.
+CI validates and tests twice: on the lowest supported Google provider (6.8.0, read from `versions.tf`) and on the newest release the constraint allows. It runs on every pull request and once a week, so a new provider release that breaks the module shows up without a change here. To validate on the lowest locally, change the `google` constraint in every `versions.tf` to `6.8.0`, run `terraform init -backend=false -upgrade && terraform validate`, and revert.
 
 An untracked `testing/` directory is ignored by git, for a caller configuration and its `terraform.tfvars` when trying the module against a real project. `terraform fmt -recursive` and `tflint --recursive` walk into it.
 
@@ -199,3 +199,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 Apache 2.0 - See [LICENSE](LICENSE)
+
+### Releasing
+
+A release is a merge to `main` whose `CHANGELOG.md` starts with a new `## X.Y.Z` heading. `.github/workflows/release.yml` runs the checks again and then, through `.github/release.sh`, pushes the annotated tag `vX.Y.Z` (the Terraform Registry publishes from it) and creates the GitHub release with that changelog section as its notes. A merge that adds no new version releases nothing; keep changes that aren't released yet under a `## Unreleased` heading above the newest version.
