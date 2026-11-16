@@ -160,6 +160,9 @@ Each repo in `gha_allowed_repos` gets its own identity provider, and any workflo
 
 ---
 
+### GitHub identity provider ids
+Each repository in `gha_allowed_repos` gets a Workload Identity provider named after the repository, adjusted where Google would refuse the name: one starting with `gcp-` (reserved) or shorter than 4 characters gets the prefix `gh-` (`aka-org/gcp-infra` becomes `gh-gcp-infra`), characters other than lowercase letters, digits and hyphens become hyphens, and the result is cut to 32 characters. The outputs `identity_provider_github_ids` and `identity_provider_github_full_ids` carry the result.
+
 ## Development
 
 What a machine needs to work on this module:
