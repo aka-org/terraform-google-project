@@ -33,7 +33,10 @@ module "service_account" {
   sa_id          = var.sa_id
   sa_description = var.sa_description
   sa_roles       = var.sa_roles
-  depends_on     = [module.project]
+
+  remove_editor_members = var.remove_editor_members
+
+  depends_on = [module.project]
 }
 
 module "bucket" {
@@ -44,8 +47,12 @@ module "bucket" {
   bucket_location      = var.bucket_location
   bucket_force_destroy = var.bucket_force_destroy
   bucket_versioning    = var.bucket_versioning
-  bucket_labels        = var.bucket_labels
-  gcs_backend          = var.gcs_backend
+
+  bucket_uniform_access           = var.bucket_uniform_access
+  bucket_public_access_prevention = var.bucket_public_access_prevention
+
+  bucket_labels = var.bucket_labels
+  gcs_backend   = var.gcs_backend
   depends_on = [
     module.project,
     module.service_account

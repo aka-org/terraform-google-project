@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - run: terraform fmt -check -recursive -diff
+
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # lowest: the oldest Google provider the constraint allows, pinned
+        # for this job only; newest: whatever the constraint resolves to.
+        google: [lowest, newest]
+    env:
+      LOWEST: "6.8.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11.4
+      - name: Pin the lowest supported Google provider
+        if: matrix.google == 'lowest'
+        run: |
+          find . -name versions.tf -print0 |
+            xargs -0 sed -i -E '/hashicorp\/google"/{n;s/version = ".*"/version = "'"$LOWEST"'"/}'
+          grep -rn -A1 'hashicorp/google"' --include=versions.tf .
+      - run: terraform init -backend=false -input=false
+      - run: terraform providers
+      - run: terraform validate
+
+  tflint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --init
+      - run: tflint --recursive -f compact

@@ -52,6 +52,23 @@ variable "bucket_versioning" {
   default     = true
 }
 
+variable "bucket_uniform_access" {
+  description = "Set to true to control access to the bucket through IAM only (no per-object ACLs)"
+  type        = bool
+  default     = true
+}
+
+variable "bucket_public_access_prevention" {
+  description = "Public access prevention of the bucket: enforced (it can never be made public) or inherited (the organization's policy decides)"
+  type        = string
+  default     = "enforced"
+
+  validation {
+    condition     = contains(["enforced", "inherited"], var.bucket_public_access_prevention)
+    error_message = "bucket_public_access_prevention must be \"enforced\" or \"inherited\"."
+  }
+}
+
 variable "bucket_labels" {
   description = "Labels to add to the created bucket"
   type        = map(string)
@@ -84,6 +101,12 @@ variable "sa_roles" {
     "roles/iam.serviceAccountUser",
     "roles/iam.serviceAccountAdmin"
   ]
+}
+
+variable "remove_editor_members" {
+  description = "If true, removes every member of roles/editor once at creation (the default Compute Engine service account and the Google APIs Service Agent included). Set to false to leave the role's members as Google grants them"
+  type        = bool
+  default     = true
 }
 
 variable "gha_wif_enabled" {

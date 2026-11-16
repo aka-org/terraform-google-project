@@ -25,3 +25,9 @@ variable "sa_roles" {
     "roles/iam.serviceAccountAdmin"
   ]
 }
+
+variable "remove_editor_members" {
+  description = "If true, removes every member of roles/editor once at creation (the default Compute Engine service account and the Google APIs Service Agent included). Set to false to leave the role's members as Google grants them"
+  type        = bool
+  default     = true
+}

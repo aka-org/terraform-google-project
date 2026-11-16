@@ -43,6 +43,9 @@ resource "google_iam_workload_identity_pool_provider" "github_repos" {
     "attribute.actor"               = "assertion.actor"
     "attribute.repository"          = "assertion.repository"
     "attribute.repository_owner_id" = "assertion.repository_owner_id"
+    # The branch or tag the workflow runs for (refs/heads/main), mapped so
+    # a caller's own IAM binding can limit an identity to one ref.
+    "attribute.ref" = "assertion.ref"
   }
 
   attribute_condition = <<EOT
