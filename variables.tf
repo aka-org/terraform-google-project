@@ -127,6 +127,27 @@ variable "gha_allowed_repos" {
   default     = []
 }
 
+variable "gha_sa_refs" {
+  description = "Git refs whose workflows may act as the default service account (e.g. [\"refs/heads/main\"]). Empty, the default, allows every ref of the allowed repos, pull requests included"
+  type        = list(string)
+  default     = []
+}
+
+variable "gha_plan_sa_id" {
+  description = "The id of a second, read-only service account that any workflow of the allowed repos may act as, for `terraform plan` on pull requests. Empty, the default, creates none"
+  type        = string
+  default     = ""
+}
+
+variable "gha_plan_sa_roles" {
+  description = "Project roles of the read-only plan service account. It also gets read access to the state bucket"
+  type        = list(string)
+  default = [
+    "roles/viewer",
+    "roles/iam.securityReviewer"
+  ]
+}
+
 variable "vpc_create" {
   description = "Set to true to create a default project vpc"
   type        = bool

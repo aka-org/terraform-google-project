@@ -77,6 +77,9 @@ module "project" {
 | gcs\_backend | If true, writes a backend.tf naming the state bucket into the directory Terraform runs in (suits a one-off apply from a workstation, not CI: see the README) | `bool` | `false` | no |
 | gha\_allowed\_repos | List of repos allowed to authenticate via identity provider | `list(string)` | `[]` | no |
 | gha\_owner\_id | ID of the owner of the github repos allowed to authenticate via identity provider | `string` | `""` | no |
+| gha\_plan\_sa\_id | The id of a second, read-only service account that any workflow of the allowed repos may act as, for `terraform plan` on pull requests. Empty, the default, creates none | `string` | `""` | no |
+| gha\_plan\_sa\_roles | Project roles of the read-only plan service account. It also gets read access to the state bucket | `list(string)` | <pre>[<br/>  "roles/viewer",<br/>  "roles/iam.securityReviewer"<br/>]</pre> | no |
+| gha\_sa\_refs | Git refs whose workflows may act as the default service account (e.g. ["refs/heads/main"]). Empty, the default, allows every ref of the allowed repos, pull requests included | `list(string)` | `[]` | no |
 | gha\_wif\_enabled | Set to true to setup Workload Identity Federation for Github Actions | `bool` | `false` | no |
 | project\_deletion\_policy | Project deletion policy (e.g. PREVENT or DELETE) | `string` | `"PREVENT"` | no |
 | project\_labels | Labels to add to project | `map(string)` | `{}` | no |
@@ -95,6 +98,7 @@ module "project" {
 | bucket\_name | The name of the bucket |
 | identity\_provider\_github\_full\_ids | Full path of workload identity provider for Github Actions |
 | identity\_provider\_github\_ids | Workload identity provider for Github Actions |
+| plan\_sa\_email | Email of the read-only plan service account (null without gha\_plan\_sa\_id) |
 | project\_id | The id of the project |
 | project\_labels | The labels of the project |
 | project\_name | The name of the project |
@@ -156,7 +160,13 @@ Removing an API from `enable_apis` (or destroying the module without destroying 
 `vpc_create` creates a bare VPC, enables the Compute Engine API and grants the default service account `roles/compute.networkAdmin`. For subnets, firewall rules or NAT use [terraform-google-network](https://github.com/aka-org/terraform-google-network) instead, with `vpc_create = false`, `compute.googleapis.com` in `enable_apis` and the network roles in `sa_roles`.
 
 ### GitHub Actions identities
-Each repo in `gha_allowed_repos` gets its own identity provider, and any workflow of that repo, on any branch, may act as the default service account. The token's `ref` is mapped (`attribute.ref`), so your own IAM bindings can limit other service accounts to one branch (`.../attribute.ref/refs/heads/main`).
+Each repo in `gha_allowed_repos` gets its own identity provider. By default any workflow of that repo, on any ref, may act as the default service account -- including the workflow of a pull request, which runs the pull request's own version of the workflow file before anyone has reviewed it.
+
+To keep that account for reviewed code only:
+- `gha_sa_refs = ["refs/heads/main"]` lets only workflows running for those refs act as the default service account. A pull request's workflow runs for `refs/pull/<n>/merge` and is refused.
+- `gha_plan_sa_id = "terraform-plan"` creates a second account that any workflow of the allowed repos may act as, with roles that change nothing (`gha_plan_sa_roles`: Viewer and Security Reviewer by default) and read access to the state bucket: enough for `terraform plan -lock=false` on a pull request. Its email is the output `plan_sa_email`.
+
+The token's `ref` is also mapped on its own (`attribute.ref`), for your own IAM bindings.
 
 ---
 
