@@ -79,6 +79,22 @@ run "identity_provider_ids_fit_what_google_accepts" {
   }
 }
 
+run "default_account_for_main_only_with_a_plan_account" {
+  variables {
+    bucket_name_prefix = "tf-states"
+    gha_wif_enabled    = true
+    gha_owner_id       = "1234"
+    gha_allowed_repos  = ["acme/infra"]
+    gha_sa_refs        = ["refs/heads/main"]
+    gha_plan_sa_id     = "terraform-plan"
+  }
+
+  assert {
+    condition     = output.plan_sa_email != null
+    error_message = "gha_plan_sa_id creates the plan account."
+  }
+}
+
 run "network_on_request" {
   variables {
     vpc_create = true
@@ -279,5 +295,78 @@ run "identity_provider_is_limited_to_its_repository_and_owner" {
   assert {
     condition     = google_iam_workload_identity_pool_provider.github_repos["acme/infra"].oidc[0].issuer_uri == "https://token.actions.githubusercontent.com"
     error_message = "The issuer is GitHub Actions."
+  }
+}
+
+run "default_account_bound_to_refs_when_given" {
+  command = plan
+
+  module {
+    source = "./modules/gha_wif"
+  }
+
+  variables {
+    project_id           = "example-1a2b3c4d"
+    sa_name              = "projects/example-1a2b3c4d/serviceAccounts/terraform-sa@example-1a2b3c4d.iam.gserviceaccount.com"
+    sa_email             = "terraform-sa@example-1a2b3c4d.iam.gserviceaccount.com"
+    gha_wif_enabled      = true
+    gha_owner_id         = "1234"
+    gha_allowed_repos    = ["acme/infra"]
+    gha_sa_refs          = ["refs/heads/main"]
+    gha_plan_sa_id       = "terraform-plan"
+    gha_plan_sa_roles    = ["roles/viewer"]
+    state_bucket_enabled = true
+    state_bucket_name    = "tf-states-1a2b3c4d"
+  }
+
+  assert {
+    condition     = length(google_service_account_iam_member.default_sa_repo_bindings) == 0
+    error_message = "With gha_sa_refs the default account has no repository-wide binding."
+  }
+  assert {
+    condition     = keys(google_service_account_iam_member.default_sa_ref_bindings) == ["acme/infra@refs/heads/main"]
+    error_message = "The default account is bound to each repository at each ref given."
+  }
+  assert {
+    condition     = google_iam_workload_identity_pool_provider.github_repos["acme/infra"].attribute_mapping["attribute.repository_ref"] == "assertion.repository + \"@\" + assertion.ref"
+    error_message = "Repository and ref are mapped together for that binding."
+  }
+  assert {
+    condition     = keys(google_service_account_iam_member.plan_sa_repo_bindings) == ["acme/infra"]
+    error_message = "Any workflow of the repository may act as the plan account."
+  }
+  assert {
+    condition     = google_storage_bucket_iam_member.plan_sa_state[0].role == "roles/storage.objectViewer"
+    error_message = "The plan account reads the state and can't write it."
+  }
+  assert {
+    condition     = keys(google_project_iam_member.plan_sa_roles) == ["roles/viewer"]
+    error_message = "The plan account gets the roles given, nothing else."
+  }
+}
+
+run "default_account_repository_wide_without_refs" {
+  command = plan
+
+  module {
+    source = "./modules/gha_wif"
+  }
+
+  variables {
+    project_id        = "example-1a2b3c4d"
+    sa_name           = "projects/example-1a2b3c4d/serviceAccounts/terraform-sa@example-1a2b3c4d.iam.gserviceaccount.com"
+    sa_email          = "terraform-sa@example-1a2b3c4d.iam.gserviceaccount.com"
+    gha_wif_enabled   = true
+    gha_owner_id      = "1234"
+    gha_allowed_repos = ["acme/infra"]
+  }
+
+  assert {
+    condition     = keys(google_service_account_iam_member.default_sa_repo_bindings) == ["acme/infra"] && length(google_service_account_iam_member.default_sa_ref_bindings) == 0
+    error_message = "Without gha_sa_refs the binding is the repository-wide one, as before."
+  }
+  assert {
+    condition     = length(google_service_account.plan) == 0
+    error_message = "No plan account unless asked for."
   }
 }

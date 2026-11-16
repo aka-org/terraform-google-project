@@ -67,6 +67,12 @@ module "gha_wif" {
   gha_wif_enabled   = var.gha_wif_enabled
   gha_owner_id      = var.gha_owner_id
   gha_allowed_repos = var.gha_allowed_repos
+
+  gha_sa_refs          = var.gha_sa_refs
+  gha_plan_sa_id       = var.gha_plan_sa_id
+  gha_plan_sa_roles    = var.gha_plan_sa_roles
+  state_bucket_enabled = var.bucket_name_prefix != ""
+  state_bucket_name    = module.bucket.bucket_name
   depends_on = [
     module.project,
     module.service_account

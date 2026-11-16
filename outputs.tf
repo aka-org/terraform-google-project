@@ -53,6 +53,11 @@ output "identity_provider_github_full_ids" {
   value       = module.gha_wif.identity_provider_github_full_ids
 }
 
+output "plan_sa_email" {
+  description = "Email of the read-only plan service account (null without gha_plan_sa_id)"
+  value       = module.gha_wif.plan_sa_email
+}
+
 output "vpc_name" {
   description = "Name of the project vpc"
   value       = module.vpc.vpc_name

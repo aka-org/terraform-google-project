@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 1.4.0
+### ADDED
+- `gha_sa_refs`: limits who may act as the default service account to workflows running for the given git refs (e.g. `refs/heads/main`), so a pull request's workflow can't. Empty (the default) keeps every ref allowed, as before.
+- `gha_plan_sa_id`, `gha_plan_sa_roles`, output `plan_sa_email`: an optional second, read-only service account for `terraform plan` on pull requests, with read access to the state bucket.
+- Identity providers also map `attribute.repository_ref` (`<owner>/<repo>@<ref>`). Existing callers see an in-place update of each provider's attribute mapping and nothing else.
+
 ## 1.3.1
 ### FIXED
 - Workload Identity Federation for a repository whose name starts with `gcp-`, is shorter than 4 characters or holds characters other than lowercase letters, digits and hyphens: the provider's id is adjusted to one Google accepts (`aka-org/gcp-infra` -> `gh-gcp-infra`) instead of failing at plan. Names that were already valid keep their provider id, so existing callers see no change.
