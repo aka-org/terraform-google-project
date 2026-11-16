@@ -1,0 +1,22 @@
+# The README's Inputs and Outputs tables are generated from the code
+# between its BEGIN_TF_DOCS / END_TF_DOCS markers: `terraform-docs .`
+# rewrites them, `terraform-docs --output-check .` (CI) fails when they
+# are out of date.
+formatter: "markdown table"
+
+sections:
+  show:
+    - inputs
+    - outputs
+
+sort:
+  enabled: true
+  by: required
+
+output:
+  file: README.md
+  mode: inject
+
+settings:
+  anchor: false
+  lockfile: false

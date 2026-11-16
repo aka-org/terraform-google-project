@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - `bucket_uniform_access`, `bucket_public_access_prevention`.
 - Output `project_number`.
 - The GitHub Actions identity providers map the token's `ref` (`attribute.ref`). Existing callers see an in-place update of each provider; no existing binding changes meaning.
-- CI: `terraform fmt`, `validate` on the lowest and newest supported provider, TFLint.
+- CI: `terraform fmt`, `validate` on the lowest and newest supported provider, TFLint, and a check that the README's Inputs and Outputs tables match the code (generated with terraform-docs).
 - README: "Behaviour worth knowing" and "Development".
 ### FIXED
 - README: `bucket_name_prefix`'s default (`""`) and the provider requirement.

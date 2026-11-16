@@ -58,7 +58,7 @@ variable "bucket_labels" {
 }
 
 variable "gcs_backend" {
-  description = "If true creates bucket named after project id to store tf states and a local backend.tf"
+  description = "If true, writes a backend.tf naming the state bucket into the directory Terraform runs in (suits a one-off apply from a workstation, not CI: see the README)"
   type        = bool
   default     = false
 }
