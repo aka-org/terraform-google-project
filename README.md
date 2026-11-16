@@ -8,8 +8,7 @@ A Terraform module to automate the creation and configuration of a Google Cloud 
 - [Features](#features)
 - [Requirements](#requirements)
 - [Usage](#usage)
-- [Module Variables](#module-variables)
-- [Outputs](#outputs)
+- [Inputs and outputs](#inputs-and-outputs)
 - [APIs Enabled](#apis-enabled)
 - [Service Account Roles](#service-account-roles)
 - [Development](#development)
@@ -58,56 +57,54 @@ module "project" {
 
 ---
 
-## Module Variables
+## Inputs and outputs
 
-| Name                  | Description                                                                 | Type           | Default                                      |
-|-----------------------|-----------------------------------------------------------------------------|----------------|----------------------------------------------|
-| project_name          | A human-readable name for the project                                        | string         | n/a (required)                               |
-| project_labels        | Labels to add to project                                                     | map(string)    | `{}`                                         |
-| project_deletion_policy | Project deletion policy (e.g. PREVENT or DELETE)                           | string         | `PREVENT`                                    |
-| billing_account_id    | Billing account ID to associate with the project                             | string         | n/a (required)                               |
-| enable_apis           | List of additional Google APIs to be enabled                                 | list(string)   | `[]`                                         |
-| bucket_name_prefix    | Prefix for the state bucket name (enables bucket if non-empty)                | string         | `""`                                         |
-| bucket_location       | Location of the bucket                                                       | string         | `us-east1`                                   |
-| bucket_force_destroy  | Allow bucket destroy even if not empty                                       | bool           | `false`                                      |
-| bucket_versioning     | Enable versioning for bucket contents                                        | bool           | `true`                                       |
-| bucket_uniform_access | Control access to the bucket through IAM only (no per-object ACLs)           | bool           | `true`                                       |
-| bucket_public_access_prevention | `enforced` (the bucket can never be made public) or `inherited`     | string         | `enforced`                                   |
-| bucket_labels         | Labels to add to the created bucket                                          | map(string)    | `{}`                                         |
-| gcs_backend           | If true, writes a `backend.tf` into the directory Terraform runs in (see [The generated backend.tf](#the-generated-backendtf)) | bool | `false`                             |
-| sa_id                 | ID of the default service account                                            | string         | `terraform-sa`                               |
-| sa_description        | Description of the default service account                                   | string         | `Default service account used by Terraform`   |
-| sa_roles              | List of roles to assign to the default service account                      | list(string)   | See below                                    |
-| remove_editor_members | Remove every member of `roles/editor` once at creation (see [The roles/editor binding](#the-roleseditor-binding)) | bool | `true`                              |
-| gha_wif_enabled       | Enable GitHub Actions Workload Identity Federation                           | bool           | `false`                                      |
-| gha_owner_id          | GitHub owner ID for WIF                                                      | string         | `""`                                         |
-| gha_allowed_repos     | List of GitHub repos allowed for WIF                                         | list(string)   | `[]`                                         |
-| vpc_create            | Set to true to create a default VPC (see [The VPC toggle](#the-vpc-toggle))  | bool           | `false`                                      |
-| vpc_name              | Name of the VPC                                                              | string         | `""`                                         |
+<!-- BEGIN_TF_DOCS -->
+## Inputs
 
-#### Default Service Account Roles
-- `roles/resourcemanager.projectIamAdmin`
-- `roles/iam.serviceAccountUser`
-- `roles/iam.serviceAccountAdmin`
-- `roles/serviceusage.serviceUsageAdmin`
-
----
+| Name | Description | Type | Default | Required |
+| ---- | ----------- | ---- | ------- | :------: |
+| billing\_account\_id | Billing account ID to associate with the project | `string` | n/a | yes |
+| project\_name | A human-readable name for the project | `string` | n/a | yes |
+| bucket\_force\_destroy | Set to true to allow the bucket to be destroyed even if it is storing content | `bool` | `false` | no |
+| bucket\_labels | Labels to add to the created bucket | `map(string)` | `{}` | no |
+| bucket\_location | Location of the bucket corresponding to google regions | `string` | `"us-east1"` | no |
+| bucket\_name\_prefix | The prefix of the name of the bucket that will store the tf states | `string` | `""` | no |
+| bucket\_public\_access\_prevention | Public access prevention of the bucket: enforced (it can never be made public) or inherited (the organization's policy decides) | `string` | `"enforced"` | no |
+| bucket\_uniform\_access | Set to true to control access to the bucket through IAM only (no per-object ACLs) | `bool` | `true` | no |
+| bucket\_versioning | Set to true to enable versioning of bucket contents | `bool` | `true` | no |
+| enable\_apis | Lists of additional Google APIs to be enabled | `list(string)` | `[]` | no |
+| gcs\_backend | If true, writes a backend.tf naming the state bucket into the directory Terraform runs in (suits a one-off apply from a workstation, not CI: see the README) | `bool` | `false` | no |
+| gha\_allowed\_repos | List of repos allowed to authenticate via identity provider | `list(string)` | `[]` | no |
+| gha\_owner\_id | ID of the owner of the github repos allowed to authenticate via identity provider | `string` | `""` | no |
+| gha\_wif\_enabled | Set to true to setup Workload Identity Federation for Github Actions | `bool` | `false` | no |
+| project\_deletion\_policy | Project deletion policy (e.g. PREVENT or DELETE) | `string` | `"PREVENT"` | no |
+| project\_labels | Labels to add to project | `map(string)` | `{}` | no |
+| remove\_editor\_members | If true, removes every member of roles/editor once at creation (the default Compute Engine service account and the Google APIs Service Agent included). Set to false to leave the role's members as Google grants them | `bool` | `true` | no |
+| sa\_description | Description of the default service account | `string` | `"Default service account used by Terraform"` | no |
+| sa\_id | The id of the default service account | `string` | `"terraform-sa"` | no |
+| sa\_roles | List of roles to be assigned to the default service account | `list(string)` | <pre>[<br/>  "roles/resourcemanager.projectIamAdmin",<br/>  "roles/iam.serviceAccountUser",<br/>  "roles/iam.serviceAccountAdmin"<br/>]</pre> | no |
+| vpc\_create | Set to true to create a default project vpc | `bool` | `false` | no |
+| vpc\_name | Name of the project vpc | `string` | `""` | no |
 
 ## Outputs
 
-- `project_name`: The name of the project
-- `project_id`: The id of the project
-- `project_number`: The numeric identifier of the project
-- `project_labels`: The labels of the project
-- `bucket_name`: The name of the bucket (if created)
-- `bucket_labels`: The labels of the bucket
-- `sa_name`: Default service fully-qualified name
-- `sa_email`: Default service account email
-- `sa_id`: Default service account id
-- `identity_provider_github_ids`: Workload identity provider for Github Actions (if enabled)
-- `identity_provider_github_full_ids`: Full path of workload identity provider for Github Actions (if enabled)
-- `vpc_name`: Name of the project VPC (if created)
-- `vpc_self_link`: Self link to the project VPC (if created)
+| Name | Description |
+| ---- | ----------- |
+| bucket\_labels | The labels of the bucket |
+| bucket\_name | The name of the bucket |
+| identity\_provider\_github\_full\_ids | Full path of workload identity provider for Github Actions |
+| identity\_provider\_github\_ids | Workload identity provider for Github Actions |
+| project\_id | The id of the project |
+| project\_labels | The labels of the project |
+| project\_name | The name of the project |
+| project\_number | The numeric identifier of the project (used in Workload Identity principals and Google-managed service agent emails) |
+| sa\_email | Default service account email |
+| sa\_id | Default service account id |
+| sa\_name | Default service account fully-qualified name |
+| vpc\_name | Name of the project vpc |
+| vpc\_self\_link | Self link to the project vpc |
+<!-- END_TF_DOCS -->
 
 ---
 
@@ -171,6 +168,7 @@ What a machine needs to work on this module:
 |---|---|---|
 | [Terraform](https://developer.hashicorp.com/terraform/install) | >= 1.11.4 | `fmt`, `validate` |
 | [TFLint](https://github.com/terraform-linters/tflint) | >= 0.50 | lint (`.tflint.hcl`) |
+| [terraform-docs](https://terraform-docs.io/user-guide/installation/) | >= 0.25 | the README's Inputs and Outputs tables (`.terraform-docs.yml`) |
 | git | any | |
 
 Nothing here needs Google Cloud credentials: `validate` and `tflint` read only the configuration.
@@ -181,7 +179,10 @@ The checks CI runs (`.github/workflows/ci.yml`), from the repository root:
 terraform fmt -check -recursive -diff
 terraform init -backend=false && terraform validate
 tflint --init && tflint --recursive
+terraform-docs --output-check .
 ```
+
+After changing a variable or an output, run `terraform-docs .` to rewrite the README's tables.
 
 CI validates twice: on the lowest supported Google provider (6.8.0) and on the newest release the constraint allows. To validate on the lowest locally, change the `google` constraint in every `versions.tf` to `6.8.0`, run `terraform init -backend=false -upgrade && terraform validate`, and revert.
 

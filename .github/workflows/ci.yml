@@ -50,3 +50,17 @@ jobs:
       - uses: terraform-linters/setup-tflint@v4
       - run: tflint --init
       - run: tflint --recursive -f compact
+
+  docs:
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM_DOCS: "v0.25.1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install terraform-docs
+        run: |
+          curl -sSfL -o /tmp/terraform-docs.tar.gz "https://terraform-docs.io/dl/${TERRAFORM_DOCS}/terraform-docs-${TERRAFORM_DOCS}-linux-amd64.tar.gz"
+          tar -xzf /tmp/terraform-docs.tar.gz -C /tmp terraform-docs
+          sudo mv /tmp/terraform-docs /usr/local/bin/
+      # Fails when the README's Inputs and Outputs tables differ from the code.
+      - run: terraform-docs --output-check .
