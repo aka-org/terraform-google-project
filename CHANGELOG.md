@@ -1,7 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 1.3.1
+### FIXED
+- Workload Identity Federation for a repository whose name starts with `gcp-`, is shorter than 4 characters or holds characters other than lowercase letters, digits and hyphens: the provider's id is adjusted to one Google accepts (`aka-org/gcp-infra` -> `gh-gcp-infra`) instead of failing at plan. Names that were already valid keep their provider id, so existing callers see no change.
 ### ADDED
 - Tests (`tests/`, `terraform test`) that plan and apply the module against mocked providers; CI runs them on the lowest and newest supported Google provider.
 - CI also runs weekly, and lints with TFLint's Google ruleset.

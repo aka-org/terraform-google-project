@@ -1,3 +1,19 @@
+locals {
+  # A provider's id is its repository's name, made to fit what Google
+  # accepts for one: lowercase letters, digits and hyphens, 4 to 32
+  # characters, not starting with the reserved "gcp-". A name that already
+  # fits is used as it is; one that is too short or starts with "gcp-"
+  # gets the prefix "gh-" (aka-org/gcp-infra -> gh-gcp-infra).
+  repo_names = {
+    for repo in var.gha_allowed_repos : repo => replace(lower(split("/", repo)[1]), "/[^a-z0-9-]/", "-")
+  }
+  provider_ids = {
+    for repo, name in local.repo_names : repo => substr(
+      length(name) < 4 || startswith(name, "gcp-") ? "gh-${name}" : name, 0, 32
+    )
+  }
+}
+
 resource "random_id" "pool_suffix" {
   count       = var.gha_wif_enabled ? 1 : 0
   byte_length = 4
@@ -30,7 +46,7 @@ resource "google_iam_workload_identity_pool_provider" "github_repos" {
   project = var.project_id
 
   workload_identity_pool_id          = google_iam_workload_identity_pool.github[0].workload_identity_pool_id
-  workload_identity_pool_provider_id = split("/", each.value)[1]
+  workload_identity_pool_provider_id = local.provider_ids[each.value]
   display_name                       = split("/", each.value)[1]
   description                        = "OIDC provider for ${each.value}"
 
