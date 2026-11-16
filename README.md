@@ -173,7 +173,7 @@ What a machine needs to work on this module:
 
 Nothing here needs Google Cloud credentials: `validate` and `tflint` read only the configuration, and the tests (`tests/`) run the module against mocked providers, creating nothing.
 
-The checks CI runs (`.github/workflows/ci.yml`), from the repository root:
+The checks CI runs (aka-org/gcp-infra's `terraform-module-ci.yml`, called from `.github/workflows/ci.yml`), from the repository root:
 
 ```sh
 terraform fmt -check -recursive -diff
@@ -202,4 +202,4 @@ Apache 2.0 - See [LICENSE](LICENSE)
 
 ### Releasing
 
-A release is a merge to `main` whose `CHANGELOG.md` starts with a new `## X.Y.Z` heading. `.github/workflows/release.yml` runs the checks again and then, through `.github/release.sh`, pushes the annotated tag `vX.Y.Z` (the Terraform Registry publishes from it) and creates the GitHub release with that changelog section as its notes. A merge that adds no new version releases nothing; keep changes that aren't released yet under a `## Unreleased` heading above the newest version.
+A release is a merge to `main` whose `CHANGELOG.md` starts with a new `## X.Y.Z` heading: `.github/workflows/release.yml` runs the checks again, pushes the annotated tag `vX.Y.Z` (the Terraform Registry publishes from it) and creates the GitHub release with that changelog section as its notes (aka-org/gcp-infra's `changelog-release.yml`). A merge that adds no new version releases nothing; keep changes that aren't released yet under a `## Unreleased` heading above the newest version.

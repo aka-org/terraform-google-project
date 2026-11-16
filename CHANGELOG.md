@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Tests (`tests/`, `terraform test`) that plan and apply the module against mocked providers; CI runs them on the lowest and newest supported Google provider.
 - CI also runs weekly, and lints with TFLint's Google ruleset.
 - Releases are made by CI from the changelog's newest version (`.github/workflows/release.yml`).
+- The checks and the release step are aka-org/gcp-infra's shared workflows, called from this repository's.
 
 ## 1.3.0
 ### CHANGED
